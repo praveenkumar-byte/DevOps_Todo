@@ -1,0 +1,45 @@
+---
+- name: Deploy Flask Application to New EC2 Instance
+  hosts: new_ec2_instance
+  become: true
+
+  tasks:
+    - name: Install Python if not installed
+      dnf:
+        name: python3
+        state: present
+
+    - name: Install Docker
+      dnf:
+        name: docker
+        state: present
+
+    - name: Install Python 3 pip package
+      dnf:
+        name: python3-pip
+        state: present
+
+    - name: Install Docker Python library
+      pip:
+        name: docker
+        state: present
+        extra_args: "--ignore-installed"
+
+    - name: Start Docker service
+      service:
+        name: docker
+        state: started
+
+    - name: Pull Docker image
+      docker_image:
+        name: "{{ docker_image_name }}"
+        source: pull
+
+    - name: Run Docker container
+      docker_container:
+        name: "{{ container_name }}"
+        image: "{{ docker_image_name }}"
+        state: started
+        ports:
+          - "{{ host_port }}:{{ flask_app_port }}"
+
