@@ -4,15 +4,34 @@
   become: true
 
   tasks:
-    - name: Install Python if not installed
+    - name: Check if Python 3 is installed
+      command: python3 --version
+      register: python_version
+      ignore_errors: true
+      changed_when: false
+
+    - name: Install Python 3 if not installed
       dnf:
         name: python3
         state: present
+      when: python_version.rc != 0
 
-    - name: Install Docker
+    - name: Check if Docker is installed
+      command: docker --version
+      register: docker_version
+      ignore_errors: true
+      changed_when: false
+
+    - name: Install Docker if not installed
       dnf:
         name: docker
         state: present
+      when: docker_version.rc != 0
+
+    - name: Start Docker service if not running
+      service:
+        name: docker
+        state: started
 
     - name: Install Python 3 pip package
       dnf:
@@ -24,7 +43,7 @@
         name: docker
         state: present
         extra_args: "--ignore-installed"
-        
+
     - name: Check if port 5000 is in use
       shell: "netstat -tuln | grep ':5000 '"
       register: port_check
@@ -33,11 +52,6 @@
     - name: Stop process using port 5000
       shell: "kill -9 $(lsof -t -i:5000)"
       when: port_check.rc == 0
-
-    - name: Start Docker service
-      service:
-        name: docker
-        state: started
 
     - name: Pull Docker image
       docker_image:
