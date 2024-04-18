@@ -24,6 +24,15 @@
         name: docker
         state: present
         extra_args: "--ignore-installed"
+        
+    - name: Check if port 5000 is in use
+      shell: "netstat -tuln | grep ':5000 '"
+      register: port_check
+      ignore_errors: true
+
+    - name: Stop process using port 5000
+      shell: "kill -9 $(lsof -t -i:5000)"
+      when: port_check.rc == 0
 
     - name: Start Docker service
       service:
