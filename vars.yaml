@@ -1,5 +1,0 @@
-docker_image_name: "praveenkumar1131/flask_app:latest"
-container_name: "flask_todo"
-host_port: "80"
-flask_app_port: "5000"
-

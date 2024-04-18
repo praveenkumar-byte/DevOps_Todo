@@ -42,4 +42,3 @@
         state: started
         ports:
           - "{{ host_port }}:{{ flask_app_port }}"
-
